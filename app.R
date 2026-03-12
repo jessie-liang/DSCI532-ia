@@ -62,5 +62,34 @@ server <- function(input, output, session) {
                       table.attr = 'class="table table-striped table-sm"'))
   })
   
+  output$bar_chart <- renderPlotly({
+    selected <- input$neighbourhood
+    
+    all_counts <- parks_df |>
+      filter(Washrooms == "Y") |>
+      count(NeighbourhoodName, name = "Count")
+    
+    all_counts$Color <- ifelse(
+      length(selected == 0) | (all_counts$NeighbourhoodName %in% selected), "#285F2A", "#bdbdbd")
+    
+    avg <- mean(all_counts$Count)
+    
+    plotly_ly(all_counts, x = ~NeighbourhoodName, 
+              y = ~Count, type = "bar", marker = list(color = ~Color)) |>
+      layout(xaxis = list(title = "Neighbourhood", tickangle = -45),
+             yaxis = list(title = "Parks with Washroom"),
+             shapes = list(list(type = "line", x0=0, x1=1,
+                                xref="paper", y0=avg, y1=avg,
+                                line = list(dash = "dot", color = "#ef9a9a"))))
+  })
+  
+  observeEvent(input$reset_all, {
+    updateTextInput(session, "search", value = "")
+    updateSelectizeInput(session, "neighbourhood", selected = "Downtown")
+    updateSliderInput(session, "size", value = range(parks_df$Hectare, na.rm = TRUE))
+    updateCheckboxGroupInput(session, "facilities", selected = character(0))
+  })
   
 }
+
+shinyApp(ui, server)
