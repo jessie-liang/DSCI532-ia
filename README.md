@@ -1,5 +1,11 @@
 # Shiny for R: Vancouver Park Dashboard
 
+## Purpose
+
+Vancouver has many parks, but it can be hard to quickly compare locations, 
+and amenities in one place. This dashboard makes that information easy to browse 
+and filter so residents, visitors, and planners can make faster and better decisions.
+
 ## How to install the packages
 
 - Open R studio
