@@ -3,6 +3,7 @@ library(bslib)
 library(plotly)
 library(dplyr)
 library(stringr)
+library(rsconnect)
 
 parks_df <- read.csv("data/raw/parks.csv",
                      sep = ";",

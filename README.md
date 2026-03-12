@@ -13,7 +13,7 @@ and filter so residents, visitors, and planners can make faster and better decis
 - Type the following code in console:
 
 ```{r}
-install.packages(c("shiny", "bslib", "plotly", "dplyr", "stringr"))
+install.packages(c("shiny", "bslib", "plotly", "dplyr", "stringr", "rsconnect"))
 ```
 
 ## How to run the app locally
