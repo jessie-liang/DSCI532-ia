@@ -30,3 +30,37 @@ ui <- page_sidebar(title = "Vancouver Park Dashboard",
                    layout_column_wrap(width = 1/2,
                                       card(card_header("Filtered Parks"), uiOutput("table_out")),
                                       card(card_header("Washrooms by Neighbourhood"), plotlyOutput("bar_chart"))))
+
+server <- function(input, output, session) {
+  filtered <- reactive({
+    df <- parks_df
+    
+    if (nchar(trimws(input$search)) > 0)
+      df <- df[str_detect(df$Name, regex(input$search, ignore_case = TRUE)), ]
+    if (length(input$neighbourhood) > 0)
+      df <- df[df$NeighbourhoodName %in% input$neighbouhood, ]
+    
+    df <- df[df$Hectare >= input$size[1] & df$Hectare <= input$size[2], ]
+    
+    for (fac in input$facilities)
+      df <- df[df[[fac]] == "Y", ]
+    
+    df
+  })
+  
+  output$table_out <- renderUI({
+    df <- filtered()
+    
+    if (nrow(df) == 0)
+      return (HTML("<p><b>No parks match your filters. </b></p>"))
+    
+    display <- data.frame(Name = df$Name,
+                          Address = paste(df$StreetNumber, df$StreetName),
+                          Neighbourhood = df$Neighbourhood)
+    
+    HTML(knitr::kable(display, format = "html",
+                      table.attr = 'class="table table-striped table-sm"'))
+  })
+  
+  
+}
