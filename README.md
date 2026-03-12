@@ -20,6 +20,6 @@ install.packages(c("shiny", "bslib", "plotly", "dplyr", "stringr"))
 
 ```{r}
 shiny::runApp("app.R")
-``
+```
 
 - Then a window will pop up with the local version of dashboard
