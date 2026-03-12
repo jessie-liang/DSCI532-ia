@@ -6,6 +6,10 @@ Vancouver has many parks, but it can be hard to quickly compare locations,
 and amenities in one place. This dashboard makes that information easy to browse 
 and filter so residents, visitors, and planners can make faster and better decisions.
 
+## Stable deployed URL
+
+https://019ce0b5-7284-d3e3-13ef-ed50fa5e7372.share.connect.posit.cloud
+
 ## How to install the packages
 
 - Open R studio
