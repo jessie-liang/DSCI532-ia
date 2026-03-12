@@ -7,23 +7,20 @@ library(stringr)
 parks_df <- read.csv("data/raw/parks.csv",
                      sep = ";",
                      stringsAsFactors = FALSE)
+
+parks_df$Hectare <- as.numeric(parks_df$Hectare)
+
 valid_neighbourhoods <- sort(unique(na.omit(parks_df$NeighbourhoodName)))
 
 ui <- page_sidebar(title = "Vancouver Park Dashboard",
-                   theme = be_theme(bootswatch = "flatly",
-                                    primary = "#285F2A",
-                                    bg = "#b1ceb1",
-                                    fg = "#2e2e2e"),
+                   theme = bs_theme(bootswatch = "flatly",
+                                    primary = "#285F2A"),
                    sidebar = sidebar(title = "Filters",
                                      textInput("search", "Search Park by Name",
                                                placeholder = "Enter park name..."),
                                      selectizeInput("neighbourhood", "Neighbourhood",
                                                     choices = valid_neighbourhoods,
                                                     selected = "Downtown", multiple = TRUE),
-                                     sliderInput("size", "Hectare",
-                                                 min = min(parks_df$Hectare, na.rm = TRUE),
-                                                 max = max(parks_df$Hectare, na.rm = TRUE),
-                                                 value = range(parks_df$Hectare, na.rm = TRUE)),
                                      checkboxGroupInput("facilities", "Facilities",
                                                         choices = c("Washrooms", "Facilities", "SpecialFeatures")),
                                      actionButton("reset_all", "Reset filters")),
@@ -38,9 +35,7 @@ server <- function(input, output, session) {
     if (nchar(trimws(input$search)) > 0)
       df <- df[str_detect(df$Name, regex(input$search, ignore_case = TRUE)), ]
     if (length(input$neighbourhood) > 0)
-      df <- df[df$NeighbourhoodName %in% input$neighbouhood, ]
-    
-    df <- df[df$Hectare >= input$size[1] & df$Hectare <= input$size[2], ]
+      df <- df[df$NeighbourhoodName %in% input$neighbourhood, ]
     
     for (fac in input$facilities)
       df <- df[df[[fac]] == "Y", ]
@@ -56,7 +51,7 @@ server <- function(input, output, session) {
     
     display <- data.frame(Name = df$Name,
                           Address = paste(df$StreetNumber, df$StreetName),
-                          Neighbourhood = df$Neighbourhood)
+                          Neighbourhood = df$NeighbourhoodName)
     
     HTML(knitr::kable(display, format = "html",
                       table.attr = 'class="table table-striped table-sm"'))
@@ -70,11 +65,11 @@ server <- function(input, output, session) {
       count(NeighbourhoodName, name = "Count")
     
     all_counts$Color <- ifelse(
-      length(selected == 0) | (all_counts$NeighbourhoodName %in% selected), "#285F2A", "#bdbdbd")
+      (length(selected) == 0) | (all_counts$NeighbourhoodName %in% selected), "#285F2A", "#bdbdbd")
     
     avg <- mean(all_counts$Count)
     
-    plotly_ly(all_counts, x = ~NeighbourhoodName, 
+    plot_ly(all_counts, x = ~NeighbourhoodName, 
               y = ~Count, type = "bar", marker = list(color = ~Color)) |>
       layout(xaxis = list(title = "Neighbourhood", tickangle = -45),
              yaxis = list(title = "Parks with Washroom"),
@@ -86,7 +81,6 @@ server <- function(input, output, session) {
   observeEvent(input$reset_all, {
     updateTextInput(session, "search", value = "")
     updateSelectizeInput(session, "neighbourhood", selected = "Downtown")
-    updateSliderInput(session, "size", value = range(parks_df$Hectare, na.rm = TRUE))
     updateCheckboxGroupInput(session, "facilities", selected = character(0))
   })
   
